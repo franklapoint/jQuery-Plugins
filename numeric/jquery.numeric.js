@@ -15,24 +15,32 @@
  * (that could be done by another script, or server-side)
  *
  * @name     numeric
- * @param    decimal      Decimal separator (e.g. '.' or ',' - default is '.'). Pass false for integers
+ * @param    config {
+ * 				decimal:'.',		//Decimal separator (e.g. '.' or ',' - default is '.'). Pass false for integers
+ * 				negative:true	//true to allow negative numbers, false to constrain to positive numbers 
+ * 			 }
+ * 
  * @param    callback     A function that runs if the number is not valid (fires onblur)
  * @author   Sam Collett (http://www.texotela.co.uk)
  * @example  $(".numeric").numeric();
- * @example  $(".numeric").numeric(",");
+ * @example  $(".numeric").numeric({},");
  * @example  $(".numeric").numeric(null, callback);
  *
  */
-$.fn.numeric = function(decimal, callback)
+$.fn.numeric = function(config, callback)
 {
-	decimal = (decimal === false) ? "" : decimal || ".";
-	callback = typeof callback == "function" ? callback : function(){};
-	return this.data("numeric.decimal", decimal).data("numeric.callback", callback).keypress($.fn.numeric.keypress).blur($.fn.numeric.blur);
+	config = config || {};
+	
+	var decimal = (config.decimal === false) ? "" : config.decimal || ".";
+	var negative = (config.negative === true) ? true : false;
+	var callback = typeof config.callback == "function" ? config.callback : function(){};
+	return this.data("numeric.decimal", decimal).data("numeric.negative",config.negative).data("numeric.callback", callback).keypress($.fn.numeric.keypress).blur($.fn.numeric.blur);
 }
 
 $.fn.numeric.keypress = function(e)
 {
 	var decimal = $.data(this, "numeric.decimal");
+	var negative = $.data(this, "numeric.negative");
 	var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
 	// allow enter/return key (only when in an input box)
 	if(key == 13 && this.nodeName.toLowerCase() == "input")
@@ -59,7 +67,7 @@ $.fn.numeric.keypress = function(e)
 	if(key < 48 || key > 57)
 	{
 		/* '-' only allowed at start */
-		if(key == 45 && this.value.length == 0) return true;
+		if(negative && key == 45 && this.value.length == 0) return true;
 		/* only one decimal separator allowed */
 		if(decimal && key == decimal.charCodeAt(0) && this.value.indexOf(decimal) != -1)
 		{
