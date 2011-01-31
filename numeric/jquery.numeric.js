@@ -30,7 +30,9 @@
 $.fn.numeric = function(config, callback)
 {
 	config = config || {};
-	
+	if(typeof config === 'boolean') {
+		config = { decimal: config };
+	}	
 	var decimal = (config.decimal === false) ? "" : config.decimal || ".";
 	var negative = (config.negative === true) ? true : false;
 	var callback = typeof config.callback == "function" ? config.callback : function(){};
